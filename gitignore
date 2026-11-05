@@ -14,3 +14,6 @@ SmartVoyage/logs/
 # Python缓存文件
 __pycache__/
 *.pyc
+
+# 忽略整个 agent_learn 文件夹
+agent_learn/
