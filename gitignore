@@ -1,0 +1,16 @@
+# 密钥文件，绝对不上传
+.env
+.env.local
+
+# 虚拟环境
+.venv/
+
+# PyCharm配置文件夹
+.idea/
+
+# 日志文件夹
+SmartVoyage/logs/
+
+# Python缓存文件
+__pycache__/
+*.pyc
