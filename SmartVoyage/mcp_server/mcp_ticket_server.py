@@ -17,9 +17,12 @@ class TicketService:  # 定义票务服务类，封装数据库操作逻辑
         # 连接数据库
         self.conn = mysql.connector.connect(
             host=conf.host,
+            port=conf.port,
             user=conf.user,
             password=conf.password,
-            database=conf.database
+            database=conf.database,
+            # 每次查询都自动提交/结束事务，避免长期持有 REPEATABLE READ 快照导致读到旧数据
+            autocommit=True
         )
 
     # 定义执行SQL查询方法，输入SQL字符串，返回JSON字符串

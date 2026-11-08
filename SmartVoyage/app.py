@@ -3,6 +3,8 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import asyncio
 import uuid
+import urllib.error
+import urllib.request
 import streamlit as st
 from python_a2a import AgentNetwork, Message, TextContent, MessageRole, Task
 from langchain_openai import ChatOpenAI
@@ -106,6 +108,33 @@ def intent_agent(user_input):
     return intents, user_queries, follow_up_message
 
 
+def extract_task_message(task):
+    """从任务状态中提取可读文本，兼容 {"error": ...} 与 {"content": {"text": ...}} 两种结构"""
+    status_message = getattr(task.status, "message", None)
+    if isinstance(status_message, dict):
+        content = status_message.get("content")
+        if isinstance(content, dict) and content.get("text"):
+            return content["text"]
+        if status_message.get("error"):
+            return f"代理调用失败：{status_message['error']}"
+        return json.dumps(status_message, ensure_ascii=False)
+    if status_message:
+        return str(status_message)
+    state = getattr(task.status.state, "value", task.status.state)
+    return f"代理返回异常状态：{state}"
+
+
+def is_agent_online(url, timeout=1.0):
+    """探测代理端口是否可连接；只要有 HTTP 响应（包括 4xx/5xx）就认为服务在线"""
+    try:
+        urllib.request.urlopen(url, timeout=timeout)
+        return True
+    except urllib.error.HTTPError:
+        return True
+    except Exception:
+        return False
+
+
 # 主界面布局
 st.title("🤖 基于A2A的SmartVoyage旅行智能助手")
 st.markdown("欢迎体验智能对话！输入问题，系统将精准识别意图并提供服务。")
@@ -185,8 +214,9 @@ with col1:
                             # 4）处理结果
                             if raw_response.status.state == 'completed':  # 正常结果
                                 agent_result = raw_response.artifacts[0]['parts'][0]['text']
-                            else:  # 异常结果
-                                agent_result = raw_response.status.message['content']['text']
+                            else:  # 失败或需要补充信息：直接返回原因，不再交给总结模型
+                                responses.append(extract_task_message(raw_response))
+                                continue
 
                             # 根据代理类型总结响应
                             if agent_name == "WeatherQueryAssistant":
@@ -243,7 +273,8 @@ with col2:
             st.markdown(f"<div class='card-title'>地址</div>", unsafe_allow_html=True)
             st.markdown(f"<div class='card-content'>{agent_url}</div>", unsafe_allow_html=True)
             st.markdown(f"<div class='card-title'>状态</div>", unsafe_allow_html=True)
-            st.markdown(f"<div class='card-content'>在线</div>", unsafe_allow_html=True)
+            status_text = '在线' if is_agent_online(agent_url) else '离线（无法连接）'
+            st.markdown(f"<div class='card-content'>{status_text}</div>", unsafe_allow_html=True)
 
 # 页脚
 st.markdown("---")

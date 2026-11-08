@@ -1,7 +1,12 @@
 import os
 
+from dotenv import load_dotenv
+
 # 项目根目录
 project_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+
+# 加载项目根目录下的 .env（已存在的环境变量优先，不会被覆盖）
+load_dotenv(os.path.join(project_root, '.env'))
 
 
 #定义配置文件
@@ -15,6 +20,7 @@ class Config:
         # 数据库配置
         self.host = os.getenv("DB_HOST", 'localhost')
         self.user = os.getenv("DB_USER", 'root')
+        self.port = int(os.getenv("DB_PORT", 3307))  
         self.password = os.getenv("DB_PASSWORD")
         self.database = os.getenv("DB_DATABASE", 'travel_rag')
 

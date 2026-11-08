@@ -1,6 +1,8 @@
 import asyncio
 import json
 import uuid
+import urllib.error
+import urllib.request
 from datetime import datetime
 import pytz
 import re
@@ -85,6 +87,38 @@ def intent_agent(user_input):
     return intents, user_queries, follow_up_message
 
 
+def extract_task_message(task):
+    """
+    从任务状态中提取可读文本，兼容不同来源的 status.message 结构：
+    - python_a2a 客户端连接失败时：{"error": "..."}
+    - 业务 Agent 正常返回/追问时：{"content": {"text": "..."}}
+    - 少数实现直接返回字符串
+    """
+    status_message = getattr(task.status, "message", None)
+    if isinstance(status_message, dict):
+        content = status_message.get("content")
+        if isinstance(content, dict) and content.get("text"):
+            return content["text"]
+        if status_message.get("error"):
+            return f"代理调用失败：{status_message['error']}"
+        return json.dumps(status_message, ensure_ascii=False)
+    if status_message:
+        return str(status_message)
+    state = getattr(task.status.state, "value", task.status.state)
+    return f"代理返回异常状态：{state}"
+
+
+def is_agent_online(url, timeout=1.0):
+    """探测代理端口是否可连接；只要有 HTTP 响应（包括 4xx/5xx）就认为服务在线"""
+    try:
+        urllib.request.urlopen(url, timeout=timeout)
+        return True
+    except urllib.error.HTTPError:
+        return True
+    except Exception:
+        return False
+
+
 # 处理用户输入的核心函数
 # 此函数模拟Streamlit的输入处理逻辑，包括意图识别、路由和响应生成
 def process_user_input(prompt):
@@ -148,8 +182,9 @@ def process_user_input(prompt):
                     # 4）处理结果
                     if raw_response.status.state == 'completed':  # 正常结果
                         agent_result = raw_response.artifacts[0]['parts'][0]['text']
-                    else:  # 异常结果
-                        agent_result = raw_response.status.message['content']['text']
+                    else:  # 失败或需要补充信息：直接返回原因，不再交给总结模型
+                        responses.append(extract_task_message(raw_response))
+                        continue
 
                     # 根据代理类型总结响应
                     if agent_name == "WeatherQueryAssistant":
@@ -209,7 +244,7 @@ def display_agent_cards():
         print(f"技能: {agent_card.skills}")
         print(f"描述: {agent_card.description}")
         print(f"地址: {agent_url}")
-        print(f"状态: 在线")  # 固定状态为在线
+        print(f"状态: {'在线' if is_agent_online(agent_url) else '离线（无法连接）'}")
 
 # 主函数：脚本入口
 # 初始化系统并进入交互循环
