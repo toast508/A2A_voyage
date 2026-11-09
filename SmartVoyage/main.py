@@ -275,4 +275,4 @@ if __name__ == "__main__":
 
     # 脚本结束时打印页脚信息
     print("\n---")
-    print("Powered by 黑马程序员 | 基于Agent2Agent的旅行助手系统 v2.0")
+    print("Powered by toast508 | 基于Agent2Agent的旅行助手系统 v2.0")

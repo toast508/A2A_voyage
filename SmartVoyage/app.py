@@ -2,6 +2,7 @@ import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import asyncio
+import html
 import uuid
 import urllib.error
 import urllib.request
@@ -16,46 +17,15 @@ import re  # 用于清理响应
 from SmartVoyage.config import Config
 from SmartVoyage.create_logger import logger
 from SmartVoyage.main_prompts import SmartVoyagePrompts
+from SmartVoyage.ui.theme import inject_theme
 
 conf = Config()
 
 # 设置页面配置
 st.set_page_config(page_title="基于A2A的SmartVoyage旅行助手系统", layout="wide", page_icon="🤖")
 
-# 自定义 CSS 打造高端大气科技感，优化对比度
-st.markdown("""
-<style>
-/* 聊天消息框样式 */
-.stChatMessage {
-    background-color: #2c3e50 !important;
-    border-radius: 12px !important;
-    padding: 15px !important;
-    margin-bottom: 15px !important;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.2) !important;
-}
-
-/* 用户消息框稍亮 */
-.stChatMessage.user {
-    background-color: #34495e !important;
-}
-
-/* ✅ 核心：强制所有文字变为白色（包括 markdown 内部） */
-.stChatMessage .stMarkdown, 
-.stChatMessage .stMarkdown p, 
-.stChatMessage .stMarkdown span, 
-.stChatMessage .stMarkdown div, 
-.stChatMessage .stMarkdown strong, 
-.stChatMessage .stMarkdown em, 
-.stChatMessage .stMarkdown code {
-    color: #ffffff !important; 
-}
-
-/* 如果你想让 emoji 图标更亮一点 */
-.stChatMessage [data-testid="stChatMessageAvatarIcon"] {
-    filter: brightness(1.2);
-}
-</style>
-""", unsafe_allow_html=True)
+# 注入统一主题（颜色、字体、圆角、阴影、响应式规则）
+inject_theme()
 
 # 初始化会话状态
 if "messages" not in st.session_state:
@@ -136,15 +106,74 @@ def is_agent_online(url, timeout=1.0):
 
 
 # 主界面布局
-st.title("🤖 基于A2A的SmartVoyage旅行智能助手")
-st.markdown("欢迎体验智能对话！输入问题，系统将精准识别意图并提供服务。")
+st.markdown(
+    """
+    <header class="sv-header">
+      <div class="sv-brand">
+        <div class="sv-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+               stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M15.6 8.4l-2.3 5.3-5.3 2.3 2.3-5.3z"></path>
+          </svg>
+        </div>
+        <div class="sv-brand-text">
+          <div class="sv-eyebrow">A2A · Multi-Agent Travel</div>
+          <h1 class="sv-title">SmartVoyage</h1>
+          <p class="sv-subtitle">旅行智能助手 · 天气、票务、预订一站式查询</p>
+        </div>
+      </div>
+      <div class="sv-header-meta">
+        <span class="sv-pill"><span class="sv-pill-dot"></span>A2A · 多智能体</span>
+      </div>
+    </header>
+    """,
+    unsafe_allow_html=True,
+)
 
 # 两栏布局：左侧对话，右侧 Agent Card
-col1, col2 = st.columns([2, 1])
+col1, col2 = st.columns([2.15, 1], gap="large")
 
 # 左侧对话区域
 with col1:
-    st.subheader("💬 对话")
+    # 零高度标记：供窄屏媒体查询识别“最外层两栏”
+    st.markdown('<div class="sv-layout-marker" aria-hidden="true"></div>', unsafe_allow_html=True)
+    st.markdown(
+        """
+        <div class="sv-section-head">
+          <span class="sv-section-kicker">Conversation</span>
+          <h2 class="sv-section-title">对话</h2>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # 空状态：只在没有历史消息时显示
+    if not st.session_state.messages:
+        st.markdown(
+            """
+            <div class="sv-empty">
+              <div class="sv-empty-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 7h16"></path>
+                  <path d="M4 12h10"></path>
+                  <path d="M4 17h7"></path>
+                  <circle cx="18" cy="16" r="3"></circle>
+                </svg>
+              </div>
+              <h2>今天想去哪里？</h2>
+              <p>问天气、查车票，或让助手推荐景点。也可以一次问多个意图，例如“查广州到深圳的车次和天气”。</p>
+              <div class="sv-suggestions">
+                <span>明天上海天气怎么样？</span>
+                <span>查询明天从上海到北京的机票</span>
+                <span>帮我推荐北京 3 个必去景点</span>
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
     # 对话历史
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
@@ -163,7 +192,7 @@ with col1:
         current_date = datetime.now(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d')
 
         # 意图识别
-        with st.spinner("正在分析您的意图..."):
+        with st.spinner("正在为你查询…"):
             try:
                 # 意图识别过程
                 intents, user_queries, follow_up_message = intent_agent(prompt)
@@ -250,32 +279,109 @@ with col1:
                 logger.error(f"意图识别JSON解析失败")
                 error_message = f"意图识别JSON解析失败：{str(json_err)}。请重试。"
                 with st.chat_message("assistant"):
-                    st.markdown(error_message)
+                    st.error(error_message)
                 st.session_state.messages.append({"role": "assistant", "content": error_message})
             except Exception as e:
                 logger.error(f"处理异常: {str(e)}")
                 error_message = f"处理失败：{str(e)}。请重试。"
                 with st.chat_message("assistant"):
-                    st.markdown(error_message)
+                    st.error(error_message)
                 st.session_state.messages.append({"role": "assistant", "content": error_message})
 
-# 右侧 Agent Card 区域
+# 右侧 Agent 卡片区域
 with col2:
-    st.subheader("🛠️ AgentCard")
+    st.markdown(
+        """
+        <div class="sv-section-head">
+          <span class="sv-section-kicker">Agent Network</span>
+          <h2 class="sv-section-title">智能体</h2>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # 一次性探测所有代理状态，供状态概览与卡片复用（沿用原有健康检查逻辑）
+    agent_urls = st.session_state.get("agent_urls", {})
+    agent_status = {name: is_agent_online(url) for name, url in agent_urls.items()}
+
+    display_names = {
+        "WeatherQueryAssistant": "天气",
+        "TicketQueryAssistant": "票务",
+        "TicketOrderAssistant": "预订",
+    }
+    status_parts = []
+    for name, _url in agent_urls.items():
+        online = agent_status.get(name, False)
+        label = html.escape(display_names.get(name, name))
+        state_text = "在线" if online else "离线"
+        state_class = "is-online" if online else "is-offline"
+        status_parts.append(
+            f'<span class="sv-status {state_class}"><span class="sv-status-dot"></span>'
+            f'{label} · {state_text}</span>'
+        )
+    st.markdown(
+        f'<div class="sv-status-row">{"".join(status_parts)}</div>',
+        unsafe_allow_html=True,
+    )
+
     for agent_name in st.session_state.agent_network.agents.keys():
         agent_card = st.session_state.agent_network.get_agent_card(agent_name)
-        agent_url = st.session_state.agent_urls.get(agent_name, "未知地址")
-        with st.expander(f"Agent: {agent_name}", expanded=False):
-            st.markdown(f"<div class='card-title'>技能</div>", unsafe_allow_html=True)
-            st.markdown(f"<div class='card-content'>{agent_card.skills}</div>", unsafe_allow_html=True)
-            st.markdown(f"<div class='card-title'>描述</div>", unsafe_allow_html=True)
-            st.markdown(f"<div class='card-content'>{agent_card.description}</div>", unsafe_allow_html=True)
-            st.markdown(f"<div class='card-title'>地址</div>", unsafe_allow_html=True)
-            st.markdown(f"<div class='card-content'>{agent_url}</div>", unsafe_allow_html=True)
-            st.markdown(f"<div class='card-title'>状态</div>", unsafe_allow_html=True)
-            status_text = '在线' if is_agent_online(agent_url) else '离线（无法连接）'
-            st.markdown(f"<div class='card-content'>{status_text}</div>", unsafe_allow_html=True)
+        agent_url = agent_urls.get(agent_name, "未知地址")
+        online = (
+            agent_status[agent_name]
+            if agent_name in agent_status
+            else is_agent_online(agent_url)
+        )
+
+        description = getattr(agent_card, "description", "") or ""
+        if description == "Agent card not available":
+            description = "无法读取 Agent Card，请确认该服务是否已启动。"
+
+        version = getattr(agent_card, "version", None) or ""
+        version_text = "" if version in ("", "unknown") else f"v{version}"
+
+        skill_parts = []
+        for skill in getattr(agent_card, "skills", None) or []:
+            if isinstance(skill, dict):
+                skill_name = skill.get("name", "")
+                skill_desc = skill.get("description", "")
+            else:
+                skill_name = getattr(skill, "name", "")
+                skill_desc = getattr(skill, "description", "")
+            skill_name = html.escape(str(skill_name or "未命名技能"))
+            skill_desc_html = (
+                f"<span>{html.escape(str(skill_desc))}</span>" if skill_desc else ""
+            )
+            skill_parts.append(
+                f'<span class="sv-skill"><strong>{skill_name}</strong>{skill_desc_html}</span>'
+            )
+        skills_block = "".join(skill_parts) or '<span class="sv-skill is-muted">暂无技能信息</span>'
+
+        state_text = "在线" if online else "离线"
+        state_class = "is-online" if online else "is-offline"
+        meta_version = (
+            f'<span class="sv-agent-version">{html.escape(version_text)}</span>'
+            if version_text else ""
+        )
+
+        agent_html = f"""
+        <div class="sv-agent">
+          <div class="sv-agent-meta">
+            <span class="sv-status {state_class}"><span class="sv-status-dot"></span>{state_text}</span>
+            {meta_version}
+          </div>
+          <p class="sv-agent-desc">{html.escape(str(description))}</p>
+          <div class="sv-agent-label">技能</div>
+          <div class="sv-skill-list">{skills_block}</div>
+        </div>
+        """
+        with st.expander(agent_name, expanded=False):
+            st.markdown(agent_html, unsafe_allow_html=True)
+            st.markdown('<div class="sv-agent-label">地址</div>', unsafe_allow_html=True)
+            st.code(agent_url, language=None)
 
 # 页脚
-st.markdown("---")
-st.markdown('<div class="footer">Powered by 黑马程序员 | 基于Agent2Agent的旅行助手系统 v2.0</div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="sv-footer">Powered by toast508 · 基于 Agent2Agent 的旅行助手系统 v2.0</div>',
+    unsafe_allow_html=True,
+)
