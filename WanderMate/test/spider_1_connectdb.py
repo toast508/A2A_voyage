@@ -6,7 +6,7 @@ import time
 import json
 import gzip
 import pytz
-from SmartVoyage.config import Config
+from WanderMate.config import Config
 
 conf = Config()
 

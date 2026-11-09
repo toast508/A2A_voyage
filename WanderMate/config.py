@@ -25,7 +25,7 @@ class Config:
         self.database = os.getenv("DB_DATABASE", 'travel_rag')
 
         # 日志配置
-        self.log_file = os.path.join(project_root, 'SmartVoyage', 'logs/app.log')
+        self.log_file = os.path.join(project_root, 'WanderMate', 'logs/app.log')
 
 
 if __name__ == '__main__':

@@ -10,8 +10,8 @@ from langchain_core.prompts import ChatPromptTemplate
 from python_a2a import AgentCard, AgentSkill, run_server, TaskStatus, TaskState, A2AServer, A2AClient, Message, \
     TextContent, MessageRole, Task
 
-from SmartVoyage.create_logger import logger
-from SmartVoyage.config import Config
+from WanderMate.create_logger import logger
+from WanderMate.config import Config
 
 conf = Config()
 

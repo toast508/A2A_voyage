@@ -1,7 +1,7 @@
 import logging
 import os
 
-from SmartVoyage.config import Config
+from WanderMate.config import Config
 
 
 def setup_logger(name, log_file='logs/app.log'):

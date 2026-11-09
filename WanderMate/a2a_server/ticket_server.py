@@ -10,8 +10,8 @@ from langchain_core.prompts import ChatPromptTemplate
 from datetime import datetime
 import pytz
 
-from SmartVoyage.config import Config
-from SmartVoyage.create_logger import logger
+from WanderMate.config import Config
+from WanderMate.create_logger import logger
 
 conf = Config()
 

@@ -7,11 +7,11 @@ from python_a2a import A2AServer, run_server, AgentCard, AgentSkill, TaskStatus,
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 
-from SmartVoyage.config import Config
+from WanderMate.config import Config
 from datetime import datetime
 import pytz
 
-from SmartVoyage.create_logger import logger
+from WanderMate.create_logger import logger
 
 conf = Config()
 

@@ -1,7 +1,7 @@
 from langchain_core.prompts import ChatPromptTemplate
 
 
-class SmartVoyagePrompts:
+class WanderMatePrompts:
 
     # 定义意图识别提示模板
     @staticmethod
@@ -77,4 +77,4 @@ class SmartVoyagePrompts:
 
 
 if __name__ == '__main__':
-    print(SmartVoyagePrompts.intent_prompt())
+    print(WanderMatePrompts.intent_prompt())

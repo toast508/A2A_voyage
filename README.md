@@ -1,6 +1,6 @@
-# SmartVoyage · 基于 A2A 与 MCP 的旅行智能助手
+# WanderMate · 基于 A2A 与 MCP 的旅行智能助手
 
-SmartVoyage 是一个多智能体旅行助手：客户端先用大模型识别用户意图，再通过 **A2A（Agent2Agent）** 协议把任务分发给天气、票务查询、票务预定三个智能体；智能体通过 **MCP（Model Context Protocol）** 工具服务访问 MySQL，最终由大模型把数据库结果整理成自然语言回答。
+WanderMate 是一个多智能体旅行助手：客户端先用大模型识别用户意图，再通过 **A2A（Agent2Agent）** 协议把任务分发给天气、票务查询、票务预定三个智能体；智能体通过 **MCP（Model Context Protocol）** 工具服务访问 MySQL，最终由大模型把数据库结果整理成自然语言回答。
 
 > 支持天气查询、火车票 / 机票 / 演唱会票查询、票务预定（演示）和景点推荐，提供 Streamlit 网页端与命令行两种入口。
 
@@ -17,7 +17,7 @@ SmartVoyage 是一个多智能体旅行助手：客户端先用大模型识别�
 - **数据库结果驱动回答**：查询结果以 JSON 返回给上层 Agent，再由大模型总结，减少凭空编造。
 - **双客户端**：Streamlit 网页界面与命令行交互。
 - **Agent 状态展示**：网页右侧显示各智能体在线 / 离线状态、技能与地址。
-- **日志记录**：统一写入 `SmartVoyage/logs/app.log`，便于排查链路问题。
+- **日志记录**：统一写入 `WanderMate/logs/app.log`，便于排查链路问题。
 
 ---
 
@@ -25,8 +25,8 @@ SmartVoyage 是一个多智能体旅行助手：客户端先用大模型识别�
 
 ```text
 用户
- ├─ Streamlit 网页端  SmartVoyage/app.py
- └─ 命令行客户端      SmartVoyage/main.py
+ ├─ Streamlit 网页端  WanderMate/app.py
+ └─ 命令行客户端      WanderMate/main.py
           │
           │ ① 意图识别 + 问题改写（LangChain + LLM）
           ▼
@@ -49,14 +49,14 @@ SmartVoyage 是一个多智能体旅行助手：客户端先用大模型识别�
 
 | 服务 | 启动模块 | 端口 | 说明 |
 | --- | --- | --- | --- |
-| 票务查询 MCP | `SmartVoyage.mcp_server.mcp_ticket_server` | 8001 | 工具 `query_tickets` |
-| 天气查询 MCP | `SmartVoyage.mcp_server.mcp_weather_server` | 8002 | 工具 `query_weather` |
-| 票务预定 MCP | `SmartVoyage.mcp_server.mcp_order_server` | 8003 | 工具 `order_train`、`order_flight`、`order_concert` |
-| 天气 Agent | `SmartVoyage.a2a_server.weather_server` | 5005 | `WeatherQueryAssistant` |
-| 票务查询 Agent | `SmartVoyage.a2a_server.ticket_server` | 5006 | `TicketQueryAssistant` |
-| 票务预定 Agent | `SmartVoyage.a2a_server.order_server` | 5007 | `TicketOrderAssistant` |
-| 网页客户端 | `streamlit run SmartVoyage/app.py` | 8501 | Streamlit 默认端口 |
-| 命令行客户端 | `python -m SmartVoyage.main` | — | 终端交互 |
+| 票务查询 MCP | `WanderMate.mcp_server.mcp_ticket_server` | 8001 | 工具 `query_tickets` |
+| 天气查询 MCP | `WanderMate.mcp_server.mcp_weather_server` | 8002 | 工具 `query_weather` |
+| 票务预定 MCP | `WanderMate.mcp_server.mcp_order_server` | 8003 | 工具 `order_train`、`order_flight`、`order_concert` |
+| 天气 Agent | `WanderMate.a2a_server.weather_server` | 5005 | `WeatherQueryAssistant` |
+| 票务查询 Agent | `WanderMate.a2a_server.ticket_server` | 5006 | `TicketQueryAssistant` |
+| 票务预定 Agent | `WanderMate.a2a_server.order_server` | 5007 | `TicketOrderAssistant` |
+| 网页客户端 | `streamlit run WanderMate/app.py` | 8501 | Streamlit 默认端口 |
+| 命令行客户端 | `python -m WanderMate.main` | — | 终端交互 |
 
 > 预定 MCP 目前是演示实现：记录日志并返回“预定成功”，不会真正写库或调用支付接口。
 
@@ -64,7 +64,7 @@ SmartVoyage 是一个多智能体旅行助手：客户端先用大模型识别�
 
 ## 技术栈与开源项目
 
-项目基于以下维护活跃的开源项目构建，版本以 `smart_voyage_requirements.txt` 锁定为准。
+项目基于以下维护活跃的开源项目构建，版本以 `wander_mate_requirements.txt` 锁定为准。
 
 | 开源项目 | 在项目中的用途 | 仓库 |
 | --- | --- | --- |
@@ -112,16 +112,16 @@ source .venv/bin/activate
 ```
 
 ```bash
-pip install -r smart_voyage_requirements.txt
+pip install -r wander_mate_requirements.txt
 ```
 
 国内网络可换用镜像：
 
 ```bash
-pip install -r smart_voyage_requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+pip install -r wander_mate_requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
-> `smart_voyage_requirements.txt` 是完整环境导出，包含 `torch`、`transformers` 等较大的包，安装时间会较长。
+> `wander_mate_requirements.txt` 是完整环境导出，包含 `torch`、`transformers` 等较大的包，安装时间会较长。
 
 ### 3. 配置 `.env`
 
@@ -141,15 +141,15 @@ DB_PASSWORD=your-password
 DB_DATABASE=travel_rag
 ```
 
-配置由 `SmartVoyage/config.py` 中的 `load_dotenv()` 自动加载，字段含义见[配置说明](#配置说明)。
+配置由 `WanderMate/config.py` 中的 `load_dotenv()` 自动加载，字段含义见[配置说明](#配置说明)。
 
 > `.env` 含密钥和数据库密码，不要提交到公开仓库；同时请确认它已被 `.gitignore` 忽略。
 
 ### 4. 初始化数据库
 
 ```bash
-mysql -u root -p -h 127.0.0.1 -P 3307 < SmartVoyage/sql/create_table.sql
-mysql -u root -p -h 127.0.0.1 -P 3307 < SmartVoyage/sql/insert_data.sql
+mysql -u root -p -h 127.0.0.1 -P 3307 < WanderMate/sql/create_table.sql
+mysql -u root -p -h 127.0.0.1 -P 3307 < WanderMate/sql/insert_data.sql
 ```
 
 `create_table.sql` 会先执行 `DROP DATABASE IF EXISTS travel_rag` 再重建，**已有同名数据库时请先备份**。
@@ -179,9 +179,9 @@ weather_data
 
 ```bash
 # 票务查询 :8001 / 天气查询 :8002 / 票务预定 :8003
-python -m SmartVoyage.mcp_server.mcp_ticket_server
-python -m SmartVoyage.mcp_server.mcp_weather_server
-python -m SmartVoyage.mcp_server.mcp_order_server
+python -m WanderMate.mcp_server.mcp_ticket_server
+python -m WanderMate.mcp_server.mcp_weather_server
+python -m WanderMate.mcp_server.mcp_order_server
 ```
 
 票务 MCP 启动后预期输出：`服务器已启动，请访问 http://127.0.0.1:8001/mcp`。
@@ -190,19 +190,19 @@ python -m SmartVoyage.mcp_server.mcp_order_server
 
 ```bash
 # 天气 :5005 / 票务查询 :5006 / 票务预定 :5007
-python -m SmartVoyage.a2a_server.weather_server
-python -m SmartVoyage.a2a_server.ticket_server
-python -m SmartVoyage.a2a_server.order_server
+python -m WanderMate.a2a_server.weather_server
+python -m WanderMate.a2a_server.ticket_server
+python -m WanderMate.a2a_server.order_server
 ```
 
 **终端 7：启动客户端**
 
 ```bash
 # 网页端：预期浏览器打开 http://localhost:8501
-streamlit run SmartVoyage/app.py
+streamlit run WanderMate/app.py
 
 # 或命令行端
-python -m SmartVoyage.main
+python -m WanderMate.main
 ```
 
 网页端左侧为对话区，右侧为 Agent Network 状态与卡片。
@@ -229,13 +229,13 @@ python -m SmartVoyage.main
 ### 命令行端
 
 ```bash
-python -m SmartVoyage.main
+python -m WanderMate.main
 ```
 
 启动后预期看到：
 
 ```text
-🤖 基于A2A的SmartVoyage旅行智能助手
+🤖 基于A2A的WanderMate旅行智能助手
 欢迎体验智能对话！输入问题，按回车提交；输入'quit'退出；输入'cards'查看代理卡片。
 
 🛠️ Agent Cards:
@@ -264,7 +264,7 @@ python -m SmartVoyage.main
 先启动票务 MCP 服务，再运行联调脚本：
 
 ```bash
-python -m SmartVoyage.test.test_ticket_mcp_server
+python -m WanderMate.test.test_ticket_mcp_server
 ```
 
 预期输出包含：
@@ -277,7 +277,7 @@ tools-->[...]
 演唱会票查询结果：...
 ```
 
-`SmartVoyage/test/` 下还提供了天气 MCP、预定 MCP、三个 A2A Agent 的联调脚本，可按同样方式运行。
+`WanderMate/test/` 下还提供了天气 MCP、预定 MCP、三个 A2A Agent 的联调脚本，可按同样方式运行。
 
 ---
 
@@ -296,7 +296,7 @@ tools-->[...]
 | `DB_PASSWORD` | 无 | MySQL 密码 |
 | `DB_DATABASE` | `travel_rag` | 数据库名 |
 
-配置读取逻辑在 `SmartVoyage/config.py`；日志文件固定为 `SmartVoyage/logs/app.log`。
+配置读取逻辑在 `WanderMate/config.py`；日志文件固定为 `WanderMate/logs/app.log`。
 
 ### 数据表
 
@@ -309,10 +309,10 @@ tools-->[...]
 
 ### 天气数据定时更新（可选）
 
-`SmartVoyage/utils/spider_weather.py` 会调用和风天气 30 天预报接口，更新北京、上海、广州、深圳四个城市的数据，并启动每日 `16:00` 的定时任务（按运行环境本地时间；代码注释按 PDT 说明）：
+`WanderMate/utils/spider_weather.py` 会调用和风天气 30 天预报接口，更新北京、上海、广州、深圳四个城市的数据，并启动每日 `16:00` 的定时任务（按运行环境本地时间；代码注释按 PDT 说明）：
 
 ```bash
-python -m SmartVoyage.utils.spider_weather
+python -m WanderMate.utils.spider_weather
 ```
 
 > 该脚本启动后会进入常驻循环。脚本内的天气 API Key 与数据库连接参数为文件内配置；如需长期使用，请替换为自己的 Key，并补充读取 `DB_PORT`（当前连接配置未显式传入端口）。
@@ -335,9 +335,9 @@ python -m SmartVoyage.utils.spider_weather
 PythonProject/
 ├─ .env                          # 本地配置（不要提交）
 ├─ .streamlit/config.toml        # 网页主题配置
-├─ smart_voyage_requirements.txt # 依赖清单
+├─ wander_mate_requirements.txt # 依赖清单
 ├─ README.md
-└─ SmartVoyage/
+└─ WanderMate/
    ├─ app.py                     # Streamlit 网页客户端
    ├─ main.py                    # 命令行客户端
    ├─ config.py                  # 环境变量与配置
@@ -407,8 +407,8 @@ LIMIT 5;
    ```
 2. 修改后先本地跑通受影响的 MCP / A2A 联调脚本：
    ```bash
-   python -m SmartVoyage.test.test_weather_mcp_server
-   python -m SmartVoyage.test.test_ticket_agent_server
+   python -m WanderMate.test.test_weather_mcp_server
+   python -m WanderMate.test.test_ticket_agent_server
    ```
 3. 提交前确认没有把 `.env`、日志、密钥、本地数据库文件加入版本控制。
 4. 提交并推送：

@@ -4,9 +4,9 @@ from datetime import date, datetime, timedelta
 from decimal import Decimal
 from mcp.server.fastmcp import FastMCP
 
-from SmartVoyage.config import Config
-from SmartVoyage.create_logger import logger
-from SmartVoyage.utils.format import DateEncoder, default_encoder
+from WanderMate.config import Config
+from WanderMate.create_logger import logger
+from WanderMate.utils.format import DateEncoder, default_encoder
 
 conf = Config()
 

@@ -9,9 +9,9 @@ import re
 from python_a2a import AgentNetwork, TextContent, Message, MessageRole, Task
 from langchain_openai import ChatOpenAI
 
-from SmartVoyage.config import Config
-from SmartVoyage.create_logger import logger
-from SmartVoyage.main_prompts import SmartVoyagePrompts
+from WanderMate.config import Config
+from WanderMate.create_logger import logger
+from WanderMate.main_prompts import WanderMatePrompts
 
 conf = Config()
 
@@ -64,7 +64,7 @@ def intent_agent(user_input):
     global conversation_history, llm
 
     # 创建意图识别链：提示模板 + LLM
-    chain = SmartVoyagePrompts.intent_prompt() | llm
+    chain = WanderMatePrompts.intent_prompt() | llm
 
     # 调用LLM进行意图识别
     current_date = datetime.now(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d')  # 获取当前日期（Asia/Shanghai时区）
@@ -163,7 +163,7 @@ def process_user_input(prompt):
                 # 不同意图处理方式
                 if intent == "attraction":
                     # 对于景点推荐，直接使用LLM生成
-                    chain = SmartVoyagePrompts.attraction_prompt() | llm
+                    chain = WanderMatePrompts.attraction_prompt() | llm
                     rec_response = chain.invoke({"query": prompt}).content.strip()
                     responses.append(rec_response)
                 elif agent_name:
@@ -188,10 +188,10 @@ def process_user_input(prompt):
 
                     # 根据代理类型总结响应
                     if agent_name == "WeatherQueryAssistant":
-                        chain = SmartVoyagePrompts.summarize_weather_prompt() | llm
+                        chain = WanderMatePrompts.summarize_weather_prompt() | llm
                         final_response = chain.invoke({"query": query_str, "raw_response": agent_result}).content.strip()
                     elif agent_name == "TicketQueryAssistant" :
-                        chain = SmartVoyagePrompts.summarize_ticket_prompt() | llm
+                        chain = WanderMatePrompts.summarize_ticket_prompt() | llm
                         final_response = chain.invoke({"query": query_str, "raw_response": agent_result}).content.strip()
                     else:
                         final_response = agent_result
@@ -251,7 +251,7 @@ def display_agent_cards():
 if __name__ == "__main__":
     # 初始化系统
     initialize_system()
-    print("🤖 基于A2A的SmartVoyage旅行智能助手")
+    print("🤖 基于A2A的WanderMate旅行智能助手")
     print("欢迎体验智能对话！输入问题，按回车提交；输入'quit'退出；输入'cards'查看代理卡片。")
 
     # 显示初始代理卡片
@@ -262,7 +262,7 @@ if __name__ == "__main__":
         # 获取用户输入
         prompt = input("\n请输入您的问题: ").strip()
         if prompt.lower() == 'quit':
-            print("感谢使用SmartVoyage！再见！")
+            print("感谢使用WanderMate！再见！")
             break
         elif prompt.lower() == 'cards':  # 查看卡片条件
             display_agent_cards()  # 重新显示卡片

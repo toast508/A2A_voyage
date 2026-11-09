@@ -6,7 +6,7 @@ import time
 import json
 import gzip
 import pytz
-from SmartVoyage.config import Config
+from WanderMate.config import Config
 
 conf = Config()
 
@@ -77,6 +77,13 @@ def store_weather_data(conn, cursor, city, data):
         return
 
     daily_data = data.get("daily", [])
+    print(f"正在处理 {city} 的数据...")
+    print("=============data==============")
+    print(data)
+    print("=============daily_data==============")
+    print(daily_data)
+    #ISO 通常特指 ISO 8601 标准
+    # 处理前 'updateTime': '2025-09-13T17:18+08:00'  处理后：update_time: 2025-09-13 17:18:00+08:06
     update_time = datetime.fromisoformat(data.get("updateTime").replace("+08:00", "+08:00")).replace(tzinfo=TZ)
 
     for day in daily_data:
@@ -125,26 +132,13 @@ def store_weather_data(conn, cursor, city, data):
     conn.commit()
     print(f"{city} 事务提交完成。")
 
-def update_weather(force_update=False):
-    conn = connect_db()
-    cursor = conn.cursor()
-
-    for city, location in city_codes.items():
-        latest_time = get_latest_update_time(cursor, city)
-        if should_update_data(latest_time, force_update):
-            print(f"开始更新 {city} 天气数据...")
-            data = fetch_weather_data(city, location)
-            if data:
-                store_weather_data(conn, cursor, city, data)
-        else:
-            print(f"{city} 数据已为最新，无需更新。最新更新时间: {latest_time}")
-
-    cursor.close()
-    conn.close()
-
-
 
 #验证代码
 if __name__ == "__main__":
-    update_weather(force_update=True)
+    conn = connect_db()
+    cursor = conn.cursor()
+    data = fetch_weather_data("北京", "101010100")
+    store_weather_data(conn, cursor, "北京", data)
+    print("数据存储完成。")
+
 

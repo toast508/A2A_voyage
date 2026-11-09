@@ -5,8 +5,8 @@ from python_a2a import A2AClient, Message, TextContent, MessageRole, Task
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 
-from SmartVoyage.config import Config
-from SmartVoyage.create_logger import logger
+from WanderMate.config import Config
+from WanderMate.create_logger import logger
 
 conf = Config()
 

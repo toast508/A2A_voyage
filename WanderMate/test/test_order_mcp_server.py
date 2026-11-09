@@ -8,8 +8,8 @@ from langchain_openai import ChatOpenAI
 from mcp import ClientSession
 from mcp.client.streamable_http import streamablehttp_client
 
-from SmartVoyage.config import Config
-from SmartVoyage.create_logger import logger
+from WanderMate.config import Config
+from WanderMate.create_logger import logger
 
 conf = Config()
 

@@ -14,15 +14,15 @@ from datetime import datetime
 import pytz
 import re  # 用于清理响应
 
-from SmartVoyage.config import Config
-from SmartVoyage.create_logger import logger
-from SmartVoyage.main_prompts import SmartVoyagePrompts
-from SmartVoyage.ui.theme import inject_theme
+from WanderMate.config import Config
+from WanderMate.create_logger import logger
+from WanderMate.main_prompts import WanderMatePrompts
+from WanderMate.ui.theme import inject_theme
 
 conf = Config()
 
 # 设置页面配置
-st.set_page_config(page_title="基于A2A的SmartVoyage旅行助手系统", layout="wide", page_icon="🤖")
+st.set_page_config(page_title="基于A2A的WanderMate旅行助手系统", layout="wide", page_icon="🤖")
 
 # 注入统一主题（颜色、字体、圆角、阴影、响应式规则）
 inject_theme()
@@ -56,7 +56,7 @@ if "agent_network" not in st.session_state:
 # 意图识别agent
 def intent_agent(user_input):
     # 创建意图识别链：提示模板 + LLM
-    chain = SmartVoyagePrompts.intent_prompt() | st.session_state.llm
+    chain = WanderMatePrompts.intent_prompt() | st.session_state.llm
 
     # 调用LLM进行意图识别
     current_date = datetime.now(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d')  # 获取当前日期（Asia/Shanghai时区）
@@ -108,23 +108,23 @@ def is_agent_online(url, timeout=1.0):
 # 主界面布局
 st.markdown(
     """
-    <header class="sv-header">
-      <div class="sv-brand">
-        <div class="sv-logo" aria-hidden="true">
+    <header class="wm-header">
+      <div class="wm-brand">
+        <div class="wm-logo" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
                stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="9"></circle>
             <path d="M15.6 8.4l-2.3 5.3-5.3 2.3 2.3-5.3z"></path>
           </svg>
         </div>
-        <div class="sv-brand-text">
-          <div class="sv-eyebrow">A2A · Multi-Agent Travel</div>
-          <h1 class="sv-title">SmartVoyage</h1>
-          <p class="sv-subtitle">旅行智能助手 · 天气、票务、预订一站式查询</p>
+        <div class="wm-brand-text">
+          <div class="wm-eyebrow">A2A · Multi-Agent Travel</div>
+          <h1 class="wm-title">WanderMate</h1>
+          <p class="wm-subtitle">旅行智能助手 · 天气、票务、预订一站式查询</p>
         </div>
       </div>
-      <div class="sv-header-meta">
-        <span class="sv-pill"><span class="sv-pill-dot"></span>A2A · 多智能体</span>
+      <div class="wm-header-meta">
+        <span class="wm-pill"><span class="wm-pill-dot"></span>A2A · 多智能体</span>
       </div>
     </header>
     """,
@@ -137,12 +137,12 @@ col1, col2 = st.columns([2.15, 1], gap="large")
 # 左侧对话区域
 with col1:
     # 零高度标记：供窄屏媒体查询识别“最外层两栏”
-    st.markdown('<div class="sv-layout-marker" aria-hidden="true"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="wm-layout-marker" aria-hidden="true"></div>', unsafe_allow_html=True)
     st.markdown(
         """
-        <div class="sv-section-head">
-          <span class="sv-section-kicker">Conversation</span>
-          <h2 class="sv-section-title">对话</h2>
+        <div class="wm-section-head">
+          <span class="wm-section-kicker">Conversation</span>
+          <h2 class="wm-section-title">对话</h2>
         </div>
         """,
         unsafe_allow_html=True,
@@ -152,8 +152,8 @@ with col1:
     if not st.session_state.messages:
         st.markdown(
             """
-            <div class="sv-empty">
-              <div class="sv-empty-icon" aria-hidden="true">
+            <div class="wm-empty">
+              <div class="wm-empty-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
                      stroke-linecap="round" stroke-linejoin="round">
                   <path d="M4 7h16"></path>
@@ -164,7 +164,7 @@ with col1:
               </div>
               <h2>今天想去哪里？</h2>
               <p>问天气、查车票，或让助手推荐景点。也可以一次问多个意图，例如“查广州到深圳的车次和天气”。</p>
-              <div class="sv-suggestions">
+              <div class="wm-suggestions">
                 <span>明天上海天气怎么样？</span>
                 <span>查询明天从上海到北京的机票</span>
                 <span>帮我推荐北京 3 个必去景点</span>
@@ -224,7 +224,7 @@ with col1:
                         # 不同意图处理方式
                         if intent == "attraction":
                             # 对于景点推荐，直接使用LLM生成
-                            chain = SmartVoyagePrompts.attraction_prompt() | llm
+                            chain = WanderMatePrompts.attraction_prompt() | llm
                             rec_response = chain.invoke({"query": prompt}).content.strip()
                             responses.append(rec_response)
                         elif agent_name:
@@ -249,11 +249,11 @@ with col1:
 
                             # 根据代理类型总结响应
                             if agent_name == "WeatherQueryAssistant":
-                                chain = SmartVoyagePrompts.summarize_weather_prompt() | llm
+                                chain = WanderMatePrompts.summarize_weather_prompt() | llm
                                 final_response = chain.invoke(
                                     {"query": query_str, "raw_response": agent_result}).content.strip()
                             elif agent_name == "TicketQueryAssistant":
-                                chain = SmartVoyagePrompts.summarize_ticket_prompt() | llm
+                                chain = WanderMatePrompts.summarize_ticket_prompt() | llm
                                 final_response = chain.invoke(
                                     {"query": query_str, "raw_response": agent_result}).content.strip()
                             else:
@@ -292,9 +292,9 @@ with col1:
 with col2:
     st.markdown(
         """
-        <div class="sv-section-head">
-          <span class="sv-section-kicker">Agent Network</span>
-          <h2 class="sv-section-title">智能体</h2>
+        <div class="wm-section-head">
+          <span class="wm-section-kicker">Agent Network</span>
+          <h2 class="wm-section-title">智能体</h2>
         </div>
         """,
         unsafe_allow_html=True,
@@ -316,11 +316,11 @@ with col2:
         state_text = "在线" if online else "离线"
         state_class = "is-online" if online else "is-offline"
         status_parts.append(
-            f'<span class="sv-status {state_class}"><span class="sv-status-dot"></span>'
+            f'<span class="wm-status {state_class}"><span class="wm-status-dot"></span>'
             f'{label} · {state_text}</span>'
         )
     st.markdown(
-        f'<div class="sv-status-row">{"".join(status_parts)}</div>',
+        f'<div class="wm-status-row">{"".join(status_parts)}</div>',
         unsafe_allow_html=True,
     )
 
@@ -353,35 +353,35 @@ with col2:
                 f"<span>{html.escape(str(skill_desc))}</span>" if skill_desc else ""
             )
             skill_parts.append(
-                f'<span class="sv-skill"><strong>{skill_name}</strong>{skill_desc_html}</span>'
+                f'<span class="wm-skill"><strong>{skill_name}</strong>{skill_desc_html}</span>'
             )
-        skills_block = "".join(skill_parts) or '<span class="sv-skill is-muted">暂无技能信息</span>'
+        skills_block = "".join(skill_parts) or '<span class="wm-skill is-muted">暂无技能信息</span>'
 
         state_text = "在线" if online else "离线"
         state_class = "is-online" if online else "is-offline"
         meta_version = (
-            f'<span class="sv-agent-version">{html.escape(version_text)}</span>'
+            f'<span class="wm-agent-version">{html.escape(version_text)}</span>'
             if version_text else ""
         )
 
         agent_html = f"""
-        <div class="sv-agent">
-          <div class="sv-agent-meta">
-            <span class="sv-status {state_class}"><span class="sv-status-dot"></span>{state_text}</span>
+        <div class="wm-agent">
+          <div class="wm-agent-meta">
+            <span class="wm-status {state_class}"><span class="wm-status-dot"></span>{state_text}</span>
             {meta_version}
           </div>
-          <p class="sv-agent-desc">{html.escape(str(description))}</p>
-          <div class="sv-agent-label">技能</div>
-          <div class="sv-skill-list">{skills_block}</div>
+          <p class="wm-agent-desc">{html.escape(str(description))}</p>
+          <div class="wm-agent-label">技能</div>
+          <div class="wm-skill-list">{skills_block}</div>
         </div>
         """
         with st.expander(agent_name, expanded=False):
             st.markdown(agent_html, unsafe_allow_html=True)
-            st.markdown('<div class="sv-agent-label">地址</div>', unsafe_allow_html=True)
+            st.markdown('<div class="wm-agent-label">地址</div>', unsafe_allow_html=True)
             st.code(agent_url, language=None)
 
 # 页脚
 st.markdown(
-    '<div class="sv-footer">Powered by toast508 · 基于 Agent2Agent 的旅行助手系统 v2.0</div>',
+    '<div class="wm-footer">Powered by toast508 · 基于 Agent2Agent 的旅行助手系统 v2.0</div>',
     unsafe_allow_html=True,
 )
