@@ -1,6 +1,5 @@
-# SmartVoyage · 基于 A2A 与 MCP 的旅行智能助手
-
-SmartVoyage 是一个多智能体旅行助手：客户端先用大模型识别用户意图，再通过 **A2A（Agent2Agent）** 协议把任务分发给天气、票务查询、票务预定三个智能体；智能体通过 **MCP（Model Context Protocol）** 工具服务访问 MySQL，最终由大模型把数据库结果整理成自然语言回答。
+# WanderMate・漫游伙伴
+WanderMate 是一个多智能体旅行助手：客户端先用大模型识别用户意图，再通过 **A2A（Agent2Agent）** 协议把任务分发给天气、票务查询、票务预定三个智能体；智能体通过 **MCP（Model Context Protocol）** 工具服务访问 MySQL，最终由大模型把数据库结果整理成自然语言回答。
 
 > 支持天气查询、火车票 / 机票 / 演唱会票查询、票务预定（演示）和景点推荐，提供 Streamlit 网页端与命令行两种入口。
 
